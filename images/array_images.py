@@ -34,18 +34,19 @@ def get_images(
     maxwidth = max([size[0] for size in sizes])
     maxheight = max([size[1] for size in sizes])
     sizecounts = {s: sizes.count(s) for s in sizeset}
-    print(
-        f"Found {count} images with size {size}..."
-        for size, count in sizecounts.items()
-    )
+    for size, count in sizecounts.items():
+        print(f"Found {count} images with size {size}...")
     if len(sizeset) > 1:
         print("Found images with different sizes!")
         print("Continue? [Y/n]")
-        while input().lower() not in ["y", "n", ""]:
-            print("Invalid input. Please enter 'y' or 'n'")
+        while True:
             input = input()
-        if input.lower() == "n":
-            sys.exit()
+            if input.lower() not in ["y", "n", ""]:
+                print("Invalid input. Please enter 'y' or 'n'")
+            elif input.lower() == "n":
+                sys.exit()
+            else:
+                break
     return images, (maxheight, maxwidth)
 
 
@@ -64,18 +65,19 @@ def array_images(
     # split imagelist into groups of rows*cols
     groups = [images[i : i + rows * cols] for i in range(0, len(images), rows * cols)]
     print(f"Creating {len(groups)} new images...")
+    ext = ".jpg" if groups[0][0].format == None else f".{groups[0][0].format.lower()}"
     for i, group in enumerate(groups):
         # create new image
-        outname = outname + f"_{i}{group[0].format}"
-        outpath = os.path.join(os.getcwd(), outname)
+        outfile = outname + f"_{i}{ext}"
+        outpath = os.path.join(os.getcwd(), outfile)
         newimage = Image.new(
             "RGB",
             (width * cols + spacing * (cols - 1), height * rows + spacing * (rows - 1)),
         )
         # paste images in grid
-        for i, im in enumerate(group):
-            row = i // cols
-            col = i % cols
+        for j, im in enumerate(group):
+            row = j // cols
+            col = j % cols
             newimage.paste(im, (col * (width + spacing), row * (height + spacing)))
         newimage.save(outpath)
         print(f"Saved {outname} to {os.getcwd()}...")
